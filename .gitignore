@@ -1,0 +1,10 @@
+venv
+.env
+.devcontainer
+.github
+.vscode
+db_gifts.sqlite3
+*/__pycache__
+*/*/__pycache__
+.devcontainer
+.DS_store
