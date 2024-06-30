@@ -1,7 +1,7 @@
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.enums.parse_mode import ParseMode
-from aiogram.utils.formatting import Text, Bold, Italic, Code
+from aiogram.utils.formatting import Text, Bold, Italic, Code, as_list
 
 import bot.keyboards.keyboards as kb
 import bot.database.requests as req
@@ -19,10 +19,10 @@ async def reply_items_by_category(callback: CallbackQuery):
 
     all_items = await req.get_items_by_category(callback.data.split('_')[1])
 
-    # TODO: Добавить красивое форматирование через встроенные методы aiogram
     # TODO: Добавить пагинацию
-    message_answer = '\n\n'.join([f'{'🟢' if item.availability else '🔴'} Название: {item.name}\nЦена: {
-        item.price}₽\nПодробная информация: /get{item.id}' for item in all_items])
+    message_answer = '\n\n'.join([f'*{'🟢' if item.availability else '🔴'} {item.name}*' +
+                                  f'\n_{format_price(item.price)} ₽_' +
+                                  f'\nПодробная информация: /get{item.id}' for item in all_items])
 
     await callback.message.answer(message_answer, parse_mode=ParseMode.MARKDOWN)
 
