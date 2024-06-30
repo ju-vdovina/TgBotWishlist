@@ -24,11 +24,10 @@ async def reply_items_by_category(callback: CallbackQuery):
 
 @item_router.message(F.text.startswith('/get'))
 async def reply_item(message: Message):
-    item_data = await req.get_item(message.text[4:])
+    item_data = await req.get_human_read_item(message.text[4:])
 
     # TODO: Добавить красивое форматирование через встроенные методы aiogram
-    # TODO: Сменить category_id на category - человекочитаемое название категории
-    message_answer = f'Название: {item_data.name}\nКатегория: {item_data.category_id}\nОписание: {item_data.description}\nЦена: {
+    message_answer = f'🌟 {item_data.name}\nКатегория: {item_data.category_name.name}\nОписание: {item_data.description}\nЦена: {
         item_data.price}₽\nМожно несколько: {'🟢' if item_data.is_many else '🔴'}\nСвободно: {'🟢' if item_data.availability else '🔴'}'
 
     await message.answer(message_answer, reply_markup=await kb.get_item_for_booking(item_data.id))

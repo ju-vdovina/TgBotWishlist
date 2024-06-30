@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 from sqlalchemy import BigInteger, String, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
 
 load_dotenv()
@@ -28,6 +28,8 @@ class Category(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(25))
 
+    category_items = relationship('Item', back_populates='category_name')
+
 
 class Item(Base):
     __tablename__ = 'items'
@@ -39,6 +41,8 @@ class Item(Base):
     category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'))
     is_many: Mapped[bool] = mapped_column()
     availability: Mapped[bool] = mapped_column(default=True)
+
+    category_name = relationship('Category', back_populates='category_items')
 
 
 async def database_main():
