@@ -1,6 +1,8 @@
+from sqlalchemy import select, update
+from sqlalchemy.orm import selectinload
+
 from bot.database.models import async_session
 from bot.database.models import User, Category, Item
-from sqlalchemy import select, update
 
 
 async def set_user(tg_id: int) -> None:
@@ -37,3 +39,8 @@ async def set_availability(item_id: int) -> None:
         await session.execute(update(Item).where(
             Item.id == item_id).values(availability=False))
         await session.commit()
+
+
+async def get_human_read_item(item_id: int):
+    async with async_session() as session:
+        return await session.scalar(select(Item).options(selectinload(Item.category_name)).where(Item.id == item_id))
