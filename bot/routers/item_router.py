@@ -1,11 +1,16 @@
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.enums.parse_mode import ParseMode
+from aiogram.utils.formatting import Text, Bold, Italic, Code
 
 import bot.keyboards.keyboards as kb
 import bot.database.requests as req
 
 item_router = Router()
+
+
+def format_price(price):
+    return format(price, ',d').replace(',', ' ')
 
 
 @item_router.callback_query(F.data.startswith('category_'))
@@ -14,10 +19,10 @@ async def reply_items_by_category(callback: CallbackQuery):
 
     all_items = await req.get_items_by_category(callback.data.split('_')[1])
 
-    # TODO: Добавить красивое форматирование через встроенные методы aiogram
     # TODO: Добавить пагинацию
-    message_answer = '\n\n'.join([f'{'🟢' if item.availability else '🔴'} Название: {item.name}\nЦена: {
-        item.price}₽\nПодробная информация: /get{item.id}' for item in all_items])
+    message_answer = '\n\n'.join([f'*{'🟢' if item.availability else '🔴'} {item.name}*' +
+                                  f'\n_{format_price(item.price)} ₽_' +
+                                  f'\nПодробная информация: /get{item.id}' for item in all_items])
 
     await callback.message.answer(message_answer, parse_mode=ParseMode.MARKDOWN)
 
@@ -26,11 +31,18 @@ async def reply_items_by_category(callback: CallbackQuery):
 async def reply_item(message: Message):
     item_data = await req.get_human_read_item(message.text[4:])
 
-    # TODO: Добавить красивое форматирование через встроенные методы aiogram
-    message_answer = f'🌟 {item_data.name}\nКатегория: {item_data.category_name.name}\nОписание: {item_data.description}\nЦена: {
-        item_data.price}₽\nМожно несколько: {'🟢' if item_data.is_many else '🔴'}\nСвободно: {'🟢' if item_data.availability else '🔴'}'
+    message_answer = Text(Bold(f'🌟 {item_data.name}'),
+                          Italic(f'\n\n{format_price(item_data.price)} ₽'),
+                          '\nСвободно: ',
+                          f'{"🟢" if item_data.availability else "🔴"}',
+                          '\n\nКатегория: ',
+                          Code(f'{item_data.category_name.name}'),
+                          f'\nОписание: {item_data.description}',
+                          '\nМожно несколько: ',
+                          f'{"🟢" if item_data.is_many else "🔴"}'
+                          )
 
-    await message.answer(message_answer, reply_markup=await kb.get_item_for_booking(item_data.id))
+    await message.answer(**message_answer.as_kwargs(), reply_markup=await kb.get_item_for_booking(item_data.id))
 
 
 @item_router.callback_query(F.data.startswith('item_'))
