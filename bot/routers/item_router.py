@@ -1,7 +1,7 @@
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.enums.parse_mode import ParseMode
-from aiogram.utils.formatting import Text, Bold, Italic, Code, as_list
+from aiogram.utils.formatting import Text, Bold, Italic, Code
 
 import bot.keyboards.keyboards as kb
 import bot.database.requests as req
