@@ -32,13 +32,15 @@ async def reply_item(message: Message):
     item_data = await req.get_human_read_item(message.text[4:])
 
     message_answer = Text(Bold(f'🌟 {item_data.name}'),
-                          '\nКатегория: ',
+                          Italic(f'\n\n{format_price(item_data.price)} ₽'),
+                          '\nСвободно: ',
+                          f'{"🟢" if item_data.availability else "🔴"}',
+                          '\n\nКатегория: ',
                           Code(f'{item_data.category_name.name}'),
                           f'\nОписание: {item_data.description}',
-                          Italic(f'\n{format_price(item_data.price)}₽'),
-                          f'\nМожно несколько: {
-                              "🟢" if item_data.is_many else "🔴"}',
-                          f'\nСвободно: {"🟢" if item_data.availability else "🔴"}')
+                          '\nМожно несколько: ',
+                          f'{"🟢" if item_data.is_many else "🔴"}'
+                          )
 
     await message.answer(**message_answer.as_kwargs(), reply_markup=await kb.get_item_for_booking(item_data.id))
 
