@@ -41,6 +41,7 @@ class Item(Base):
     category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'))
     is_many: Mapped[bool] = mapped_column()
     availability: Mapped[bool] = mapped_column(default=True)
+    link: Mapped[str] = mapped_column(String(300))
 
     category_name = relationship('Category', back_populates='category_items')
 

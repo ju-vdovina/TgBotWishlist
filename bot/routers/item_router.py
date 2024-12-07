@@ -1,7 +1,7 @@
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.enums.parse_mode import ParseMode
-from aiogram.utils.formatting import Text, Bold, Italic, Code
+from aiogram.utils.formatting import Text, Bold, Italic, Code, TextLink
 
 import bot.keyboards.keyboards as kb
 import bot.database.requests as req
@@ -17,7 +17,7 @@ def format_price(price):
 async def reply_items_by_category(callback: CallbackQuery):
     await callback.answer('Вы выбрали категорию')
 
-    all_items = await req.get_items_by_category(callback.data.split('_')[1])
+    all_items = await req.get_items_by_category(int(callback.data.split('_')[1]))
 
     # TODO: Добавить пагинацию
     message_answer = '\n\n'.join([f'*{'🟢' if item.availability else '🔴'} {item.name}*' +
@@ -31,7 +31,7 @@ async def reply_items_by_category(callback: CallbackQuery):
 async def reply_item(message: Message):
     item_data = await req.get_human_read_item(message.text[4:])
 
-    message_answer = Text(Bold(f'🌟 {item_data.name}'),
+    message_answer = Text(TextLink(Bold(f'🌟 {item_data.name}'), url=f'{item_data.link}') if item_data.link else Bold(f'🌟 {item_data.name}'),
                           Italic(f'\n\n{format_price(item_data.price)} ₽'),
                           '\nСвободно: ',
                           f'{"🟢" if item_data.availability else "🔴"}',
@@ -49,8 +49,8 @@ async def reply_item(message: Message):
 async def reply_book_item(callback: CallbackQuery):
     await callback.answer('Бронирую подарок...')
 
-    item_data = await req.get_item(callback.data.split('_')[1])
-    if item_data.availability == False:
+    item_data = await req.get_item(int(callback.data.split('_')[1]))
+    if not item_data.availability:
         await callback.message.answer('Подарок уже забронирован, но если его можно несколько, то пожалуйста 💞', reply_markup=kb.main_kb)
     else:
         await req.set_availability(item_data.id)
